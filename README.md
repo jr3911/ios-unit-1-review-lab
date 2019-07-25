@@ -37,6 +37,41 @@ Britain is a history of repeated injuries and usurpations, all having in direct 
 establishment of an absolute Tyranny over these States. To prove this, let Facts be submitted to a
 candid world.
 """
+
+//makes an array of substrings without any punctuation or white spaces
+let formattedString = declarationOfIndependence.split { $0.isLetter == false }
+//filter out any substrings that have less than 5 letters
+let arrString = formattedString.filter { $0.count >= 5 }
+//make a set of unique words, to get rid of duplicates; to be used as the keys to a dictionary
+let wordSet = Set(arrString)
+//make an empty dictionary, to be used to keep track of how many times a word has occurred in the text
+var wordDictionary: [String.SubSequence:Int] = [:]
+
+//populate the dictionary
+for key in wordSet {
+    var numOccurrences = 0
+    for word in formattedString where key == word {
+        numOccurrences += 1
+        wordDictionary[key] = numOccurrences
+    }
+}
+
+//making a function that accepts a dictionary and returns the most frequent appearing key
+func mostFrequentWord(_ dictionary: [String.SubSequence:Int]) -> String {
+    var mostCommonWord = ""
+    for key in dictionary.keys where dictionary[key] == dictionary.values.max() {
+        mostCommonWord = String(key)
+    }
+    return mostCommonWord
+}
+
+let mostCommonWord = mostFrequentWord(wordDictionary)
+let mostNumOccurrences = wordDictionary.values.max()
+
+print("The most frequent number of occurrences of a word that is longer than 5 letters within the Declaration of Independence occurs \(mostNumOccurrences!) times.")
+print("'\(mostCommonWord)' occurs \(wordDictionary[String.SubSequence(mostCommonWord)]!) times.")
+
+
 ```
 
 ## Question 2
@@ -46,6 +81,24 @@ Make an array that contains all elements that appear more than twice in someRepe
 
 ```swift
 var someRepeatsAgain = [25,11,30,31,50,28,4,37,13,20,24,38,28,14,44,33,7,43,39,35,36,42,1,40,7,14,23,46,21,39,11,42,12,38,41,48,20,23,29,24,50,41,38,23,11,30,50,13,13,16,10,8,3,43,10,20,28,39,24,36,21,13,40,25,37,39,31,4,46,20,38,2,7,11,11,41,45,9,49,31,38,23,41,16,49,29,14,6,6,11,5,39,13,17,43,1,1,15,25]
+
+let setKeys = Set(someRepeatsAgain)
+var dictionary: [Int:Int] = [:]
+var finalArr = [Int]()
+
+for key in setKeys {
+    var numOccurrences = 0
+    for num in someRepeatsAgain where num == key {
+        numOccurrences += 1
+        dictionary[key] = numOccurrences
+    }
+}
+
+for key in dictionary.keys where dictionary[key]! > 1 {
+    finalArr.append(key)
+}
+
+print(finalArr)
 ```
 
 ## Question 3
@@ -54,13 +107,21 @@ Identify if there are 3 integers in the following array that sum to 10. If so, p
 
 ```swift
 var tripleSumArr = [-20,-14, -8,-5,-3,-2,1,2,3,4,9,15,20,30]
+
+for num1 in 0...tripleSumArr.count - 2 {
+    for num2 in 1...tripleSumArr.count - 1 {
+        for num3 in 2..<tripleSumArr.count where tripleSumArr[num1] + tripleSumArr[num2] + tripleSumArr[num3] == 10 && num1 != num2 && num1 != num3 && num2 != num3 {
+            print("(\(tripleSumArr[num1])) + (\(tripleSumArr[num2])) + (\(tripleSumArr[num3])) = 10")
+        }
+    }
+}
 ```
 
 
 ## Question 3
 
 ```swift
-let letterValues = [
+let letterValues: [Character:Int] = [
 "a" : 54,
 "b" : 24,
 "c" : 42,
@@ -91,12 +152,38 @@ let letterValues = [
 ```
 
 a. Sort the string below in descending order according the dictionary letterValues
+
+```swift
 var codeString = "aldfjaekwjnfaekjnf"
 
+let encodedStringArr: [Character] = codeString.sorted { (x: Character, y: Character) -> Bool in
+    return letterValues[x]! > letterValues[y]!
+}
+
+var encodedString = ""
+for element in encodedStringArr {
+    encodedString += String(element)
+}
+
+print(encodedString)
+```
 
 b. Sort the string below in ascending order according the dictionary letterValues
+
+```swift
 var codeStringTwo = "znwemnrfewpiqn"
 
+let encodedStringArr: [Character] = codeString.sorted { (x: Character, y: Character) -> Bool in
+    return letterValues[x]! < letterValues[y]!
+}
+
+var encodedString = ""
+for element in encodedStringArr {
+    encodedString += String(element)
+}
+
+print(encodedString)
+```
 
 ## Question 4
 
@@ -104,9 +191,20 @@ Given an Array of Arrays of Ints, write a function that returns the Array of Int
 
 
 ```swift
-Input: [[2,4,1],[3,0],[9,3]]
+//Input: [[2,4,1],[3,0],[9,3]]
+//Output: [9,3]
 
-Output: [9,3]
+var arrIntsArrs =  [[2,4,1],[3,0],[9,3]]
+
+func largestSumArr(_ arr: [[Int]]) -> [Int] {
+    var largestSum = 0
+    var largestArr = [Int]()
+    for array in arr where array.reduce(0, +) > largestSum {
+        largestArr = array
+    }
+    return largestArr
+}
+
 ```
 
 ## Question 5
@@ -115,6 +213,18 @@ Output: [9,3]
 struct Receipt {
   let storeName: String
   let items: [ReceiptItem]
+  
+  func totalCost(_ items: [ReceiptItem]) -> Double {
+        return items.map { $0.price }.reduce(0, +)
+  }
+  
+  func storeMatch(_ arr: [Receipt], _ storeName: String) -> [Receipt] {
+        return arr.filter { $0.storeName ==  storeName }
+  }
+  
+  func sortedPrice(_ arr: [Receipt]) -> [Receipt] {
+        return arr.sorted { $0.totalCost($0.items) < $1.totalCost($1.items) }
+  }
 }
 
 struct ReceiptItem {
@@ -125,9 +235,29 @@ struct ReceiptItem {
 
 a. Given the structs above, add a method to `Receipt` that returns the total cost of all items
 
+```swift
+func totalCost(_ items: [ReceiptItem]) -> Double {
+    return items.map { $0.price }.reduce(0, +)
+}
+```
+
 b. Write a function that takes in an array of `Receipts` and returns an array of `Receipts` that match a given store name
 
+```swift
+func storeMatch(_ arr: [Receipt], _ storeName: String) -> [Receipt] {
+    return arr.filter { $0.storeName ==  storeName }
+}
+
+```
+
 c. Write a function that takes in an array of `Receipts` and returns an array of those receipts sorted by price
+
+```swift
+func sortedPrice(_ arr: [Receipt]) -> [Receipt] {
+    return arr.sorted { $0.totalCost($0.items) < $1.totalCost($1.items) }
+}
+```
+
 
 ## Question 6
 
@@ -137,7 +267,7 @@ a. The code below doesn't compile.  Why?  Fix it so that it does compile.
 class Giant {
     var name: String
     var weight: Double
-    let homePlanet: String
+    var homePlanet: String  //needed to be var in order to be mutated
 
     init(name: String, weight: Double, homePlanet: String) {
         self.name = name
@@ -159,26 +289,45 @@ b. Using the Giant class. What will the value of `edgar.name` be after the code 
 let edgar = Giant(name: "Edgar", weight: 520.0, homePlanet: "Earth")
 let jason = edgar
 jason.name = "Jason"
+
+//will both be "Jason" because class types pass by reference
 ```
 
 ## Question 7
 
-```
+```swift
 struct BankAccount {
     var owner: String
     var balance: Double
-
-    func deposit(_ amount: Double) {
+    var deposits: [Double] = []
+    var withdraws: [Double] = []
+    private let startingBalance: Double
+    
+    init(owner: String, balance: Double) {
+        self.owner = owner
+        self.balance = balance
+        self.startingBalance = balance
+    }
+    
+    mutating func deposit(_ amount: Double) {
         balance += amount
+        deposits.append(amount)
     }
 
-    func withdraw(_ amount: Double) {
+    mutating func withdraw(_ amount: Double) {
         balance -= amount
+        withdraws.append(amount)
+    }
+    
+    func totalGrowth() -> Double {
+        return self.balance - startingBalance
     }
 }
 ```
 
 a. Explain why the code above doesn't compile, then fix it.
+
+//Functions need to have mutating prefix in order to change its properties' values.
 
 b. Add a property called `deposits` of type `[Double]` that stores all of the deposits made to the bank account
 
@@ -193,6 +342,19 @@ e. Add a method called `totalGrowth` that returns a double representing the chan
 ```swift
 enum GameOfThronesHouse: String {
     case stark, lannister, targaryen, baratheon
+    
+    func houseWords() -> String {
+        switch self {
+        case .baratheon:
+            return "Ours is the Fury"
+        case .stark:
+            return "Winter is coming"
+        case .targaryen:
+            return "Fire and Blood"
+        case .lannister:
+            return "A Lannister always pays his debts"
+        }
+    }
 }
 ```
 
@@ -230,8 +392,10 @@ class MusicLibrary {
 let library1 = MusicLibrary()
 library1.add(track: "Michelle")
 library1.add(track: "Voodoo Child")
-let library2 = library
+let library2 = library1
 library2.add(track: "Come As You Are")
+
+//library1 and library2 have the same elements of "Michelle", "Voodoo Child", and "Come As You Are" because classes pass by reference
 ```
 
 ## Question 10
@@ -242,4 +406,22 @@ Make a function that takes in an array of strings and returns an array of string
 Input: ["Hello", "Alaska", "Dad", "Peace", "Power"]
 
 Output: ["Alaska", "Dad", "Power"]
+```
+
+```swift
+func oneRowStrings(_ arr: [String]) -> [String] {
+    let row1 = Set("qwertyuiop")
+    let row2 = Set("asdfghjkl")
+    let row3 = Set("zxcvbnm")
+    let arrRows = [row1,row2,row3]
+    var goodArr = [String]()
+
+    for string in arr {
+        var setString = Set(string.lowercased())
+        for row in arrRows where setString.isSubset(of: row) {
+            goodArr.append(string)
+        }
+    }
+    return goodArr
+}
 ```
